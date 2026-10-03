@@ -1,0 +1,105 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Maze of Galious — partidas en el Yamanooto (Konami, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html" style=color:var(--tinta)>Portada</a><a href="../index.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
+<h1 id="the-maze-of-galious-partidas-en-el-yamanooto">The Maze of Galious — partidas en el Yamanooto</h1>
+<p>El juego guarda la partida en una <b>contraseña de 45 letras</b> que hay que apuntar a mano. Con este parche, en la sala de la contraseña se elige <b>un slot de los tres</b> y la partida se graba en la flash del cartucho. En el título, la L ya no lleva a teclear: sale el menú de slots. Lo que se graba son esas mismas 45 letras y <b>el juego las comprueba con su propia suma</b>, como si se tecleasen.</p>
+<p><b>55</b> bytes cambiados en <b>4</b> tramos · driver de <b>8 KB</b> · 3 slots en <b>un sector de 64 KB</b> · no se distribuye ninguna ROM</p>
+<h2 id="como-se-juega">Cómo se juega</h2>
+<ul><li><b>Grabar:</b> en la sala de la contraseña se responde SÍ. En vez de la contraseña sale <em>SAVE IN WHICH SLOT?</em> con los tres slots (<em>USED</em> o <em>EMPTY</em>), y se pulsa 1, 2 o 3.</li><li><b>Cargar:</b> en el título se pulsa L. En vez de la pantalla de teclear sale <em>LOAD WHICH SLOT?</em> y se pulsa el número del slot.</li></ul>
+<p>Un slot dañado no rompe nada: da el <em>THAT IS THE WRONG...</em> del propio juego, igual que una contraseña mal tecleada.</p>
+<h2 id="lo-que-hace-falta">Lo que hace falta</h2>
+<ul><li><b>La ROM del juego</b>, que este repositorio no distribuye: <em>The Maze of Galious</em> (Konami, 1987, RC-749), 131.072 bytes, sha256 <code>420c42c18006eb5dbb25efa5b83e340d740824c15a714929a945c0db51f97280</code>.</li><li><b>Python 3.</b></li><li><b>Un Yamanooto</b> de 2 MB o de 8 MB.</li></ul>
+<h2 id="montar-la-imagen">Montar la imagen</h2>
+<pre><code>python tools/imagen.py galious.rom</code></pre>
+<p>Sale <code>galious_yamanooto_2MB.rom</code>, lista para grabar en el cartucho. <b>Grabarla sustituye el menú y los juegos que tenga el cartucho.</b> En openMSX:</p>
+<pre><code>openmsx -cart galious_yamanooto_2MB.rom -romtype Yamanooto</code></pre>
+<p><code>make test</code> pasa los 6 tests: los <code>.bin</code> salen de sus <code>.asm</code>, el menú no lleva nada del juego, el parcheador rechaza otra ROM y, con la ROM en la raíz, fuera de los tramos que declara el parcheador el juego es el original byte a byte y la imagen es la de referencia.</p>
+<h2 id="como-funciona-por-dentro">Cómo funciona por dentro</h2>
+<ul><li>Tres sitios del banco 2 (p02:90F5, p02:910D y p02:9716) llaman a tres entradas escritas en el relleno del banco 3: 39 bytes en 0xBF93, antes de la marca de Konami.</li><li>Esas entradas ponen el driver (<a href="https://github.com/antxiko/Galious-Yamanooto-Patch/blob/main/launcher/galious_driver.asm">launcher/galious_driver.asm</a>, 8 KB añadidos como banco 0x10) en la ventana 0x8000 con las interrupciones cortadas, porque la interrupción del juego cambia de banco para el sonido.</li><li>Cada slot es <code>[0xA5][45 letras]</code> en un sector de 64 KB de la flash (banco relativo 0x18). Para cambiar uno se copia el principio del sector a la RAM, se borra el sector, se vuelve a programar y se relee para comprobarlo; si no cuadra, <em>FLASH ERROR</em>.</li><li>La RAM que usa (0xF100-0xF2CF) está medida: en una partida de 35.812 cuadros el juego no escribe nada entre 0xF0F9 y 0xF37F.</li><li>Las direcciones salen del <a href="https://antxiko.github.io/MazeOfGalious-disassembly/">desensamblado comentado de The Maze of Galious</a>. El parcheador comprueba los bytes originales de cada sitio y se niega a escribir si no cuadran.</li></ul>
+<h2 id="de-donde-sale">De dónde sale</h2>
+<p>Es una pieza de <a href="https://github.com/antxiko/msx-yamanooto-npackr">nPackR</a>, que la usa para meter el juego en una colección. Aquí va suelta, con el menú de nPackR ya preparado para este juego. Licencia GPL v3 (<a href="https://github.com/antxiko/Galious-Yamanooto-Patch/blob/main/LICENSE">LICENSE</a>) y una nota de uso no comercial (<a href="https://github.com/antxiko/Galious-Yamanooto-Patch/blob/main/NOTICE.md">NOTICE.md</a>).</p>
+<h2 id="probado">Probado</h2>
+<p>En openMSX; todavía no en un cartucho real.</p>
+<footer><p><em>The Maze of Galious</em> lo public&oacute; Konami para MSX en 1987; son 128 KB. Todos los derechos sobre el juego siguen siendo de sus titulares. Esto es un parche extraoficial: aqu&iacute; nunca se distribuye la imagen del cartucho.</p></footer></div>

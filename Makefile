@@ -13,7 +13,11 @@ bins:
 imagen: $(ROM)
 	python3 tools/imagen.py $(ROM)
 
+# la web: el README en docs/ (ingles) y docs/es/ (castellano)
+web:
+	python3 tools/web.py
+
 test:
 	python3 -m unittest discover -s tests -v
 
-.PHONY: all bins imagen test
+.PHONY: all bins imagen web test
