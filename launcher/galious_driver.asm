@@ -29,8 +29,8 @@
 ; Build: pasmo --bin galious_driver.asm galious_driver.bin   (8192 bytes)
 ;==============================================================================
 
-K4_REG_6000 equ 0x6000
-K4_REG_A000 equ 0xA000
+SCC_REG_6000 equ 0x7000    ; Konami-SCC registers of the 0x6000 and 0xA000 windows
+SCC_REG_A000 equ 0xB000
 BankIn60    equ 0xF0F1
 BankInA0    equ 0xF0F3
 SAVE_BANK   equ 0x18
@@ -119,7 +119,7 @@ save_key:
     ldir
     call ENGINE
     ld   a, (BankIn60)      ; in case the Yamanooto register writes moved it
-    ld   (K4_REG_6000), a
+    ld   (SCC_REG_6000), a
     call map_save           ; verify: the sector must read back as staged
     ld   hl, 0xA000
     ld   de, STAGE
@@ -229,12 +229,12 @@ slot_addr:
     ld   h, 0xA0
 map_save:
     ld   a, SAVE_BANK
-    ld   (K4_REG_A000), a
+    ld   (SCC_REG_A000), a
     ret
 unmap_save:
     push af
     ld   a, (BankInA0)
-    ld   (K4_REG_A000), a
+    ld   (SCC_REG_A000), a
     pop  af
     ret
 

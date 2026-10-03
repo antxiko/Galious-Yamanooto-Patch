@@ -7,12 +7,15 @@ PARCHEADOR = "packager/galious_to_yamanooto.py"
 TAM_PARCHEADO = 0x20000 + 0x2000         # + el driver como banco 0x10
 FUENTES = ["galious_engine.asm", "galious_shim.asm", "galious_driver.asm"]
 INCLUYE = {"galious_driver.asm": ["galious_engine.bin"]}
-SALIDA = "galious_yamanooto_2MB.rom"
-SHA256_IMAGEN = "9bca2d7daaa42e6889b832d989040aafdaa8fceecdbd45cd9745dc53596a9177"
+SALIDA = "galious_yamanooto.rom"
+SECTOR = 0x18 * 0x2000                   # el sector de 64 KB donde graba
+TAM_IMAGEN = SECTOR + 0x10000           # 256 KB, para el offset 0 de la flash
+SHA256_IMAGEN = "fa30b022c9f26e6ed6566f16b159836d6286a35191964cf5d6a676552c3dcc4b"
 
 # Los tramos que el parcheador declara (offset, largo): fuera de ellos, el
 # juego parcheado es la ROM original byte a byte (tests/test_parche.py)
 import sys as _s, pathlib as _p                        # noqa: E402
 _s.path.insert(0, str(_p.Path(__file__).resolve().parent.parent / "packager"))
 import galious_to_yamanooto as _q                      # noqa: E402
-ZONAS = [(off, len(old)) for _, off, old, _ in _q.SITES] + [(_q.SHIM_OFFSET, _q.SHIM_MAX)]
+ZONAS = ([(off, len(old)) for _, off, old, _ in _q.SITES] + [(_q.SHIM_OFFSET, _q.SHIM_MAX)]
+         + [(off + 2, 1) for off in _q.MAPPER_SITES])

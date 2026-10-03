@@ -9,10 +9,12 @@ from 3 slots in Yamanooto flash instead of showing/typing the password.
   restores the game exactly as if it had been typed.
 
 Three call sites of bank 2 are repointed at stubs written into bank 3's free
-0xFF tail (galious_shim.bin at ROM 0x7F93 = CPU 0xBF93), and the 8KB driver
-(galious_driver.bin) is appended as game-relative bank 0x10. Pack the result
-with `mapper = "galious"`: 256KB footprint, 64KB save sector at relative bank
-0x18 (the same layout as "mg1").
+0xFF tail (galious_shim.bin at ROM 0x7F93 = CPU 0xBF93), the game's 32 bank
+switches are moved from the Konami-4 registers to the Konami-SCC ones (the
+mode a Yamanooto starts in), and the 8KB driver (galious_driver.bin) is
+appended as game-relative bank 0x10. The 64KB save sector is relative bank
+0x18: flashed at offset 0 with that sector blank (tools/imagen.py), the game
+boots and saves on its own.
 
 Addresses come from the annotated disassembly (antxiko/MazeOfGalious-
 disassembly). Every patched site is checked against the original bytes and
@@ -51,6 +53,20 @@ SITES = [
 ]
 
 
+# The game's 32 bank switches, all `ld (6000h/8000h/A000h),a` in bank 0 (the
+# Konami-4 registers). Each gets the Konami-SCC register of the same window
+# (7000h/9000h/B000h): the high byte of the operand. That is the mode a
+# Yamanooto starts in, so the patched game boots straight from flash offset 0,
+# with no menu and no boot code. ROM offsets of the `32 nn nn` opcodes:
+MAPPER_SITES = [
+    0x0103, 0x0107, 0x0115, 0x011B, 0x016F, 0x0176, 0x017D, 0x0188,
+    0x018F, 0x0196, 0x01A1, 0x01A8, 0x01AF, 0x01BA, 0x01C1, 0x01C8,
+    0x01D3, 0x01DA, 0x01E1, 0x01EC, 0x01F7, 0x0202, 0x020D, 0x0218,
+    0x0223, 0x022E, 0x0239, 0x0244, 0x0E47, 0x0E4B, 0x0E59, 0x0E62,
+]
+K4_TO_SCC = {0x60: 0x70, 0x80: 0x90, 0xA0: 0xB0}
+
+
 def patch(rom: bytes, shim: bytes, driver: bytes) -> bytes:
     if len(rom) != ROM_SIZE:
         raise SystemExit(f"ROM must be {ROM_SIZE} bytes (128KB), got {len(rom)}")
@@ -68,6 +84,12 @@ def patch(rom: bytes, shim: bytes, driver: bytes) -> bytes:
             raise SystemExit(f"{what} @0x{off:05X}: expected {old.hex()}, found "
                              f"{got.hex()} — unknown dump, refusing (nothing written)")
         data[off:off + len(new)] = new
+    for off in MAPPER_SITES:
+        got = bytes(data[off:off + 3])
+        if got[0] != 0x32 or got[1] != 0x00 or got[2] not in K4_TO_SCC:
+            raise SystemExit(f"bank switch @0x{off:05X}: expected 32 00 60/80/A0, found "
+                             f"{got.hex()} — unknown dump, refusing (nothing written)")
+        data[off + 2] = K4_TO_SCC[got[2]]
     data[SHIM_OFFSET:SHIM_OFFSET + len(shim)] = shim
     return bytes(data) + driver
 

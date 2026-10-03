@@ -33,22 +33,6 @@ class Ensamblado(unittest.TestCase):
                                  src.with_suffix(".bin").read_bytes(), asm)
 
 
-class Menu(unittest.TestCase):
-    def test_cabe_antes_del_juego(self):
-        menu = (RAIZ / "menu" / "menu.bin").read_bytes()
-        self.assertLessEqual(len(menu), imagen.JUEGO_EN)
-        self.assertNotEqual(menu[-1], 0xFF)
-
-    @unittest.skipUnless(ROM.exists(), f"sin {juego.ROM}")
-    def test_no_lleva_nada_del_juego(self):
-        menu = (RAIZ / "menu" / "menu.bin").read_bytes()
-        rom = ROM.read_bytes()
-        trozos = {rom[i:i + 64] for i in range(0, len(rom), 64)
-                  if len(set(rom[i:i + 64])) > 4}
-        for i in range(0, len(menu) - 64, 16):
-            self.assertNotIn(menu[i:i + 64], trozos, hex(i))
-
-
 class Parcheador(unittest.TestCase):
     def test_rechaza_otra_rom(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -63,8 +47,7 @@ class Parcheador(unittest.TestCase):
     @unittest.skipUnless(ROM.exists(), f"sin {juego.ROM}")
     def test_fuera_de_lo_declarado_es_el_original(self):
         rom = ROM.read_bytes()
-        img = imagen.monta(ROM)
-        juego_p = img[imagen.JUEGO_EN:imagen.JUEGO_EN + juego.TAM_PARCHEADO]
+        juego_p = imagen.monta(ROM)[:juego.TAM_PARCHEADO]
         dentro = set()
         for off, n in juego.ZONAS:
             dentro.update(range(off, off + n))
@@ -79,7 +62,8 @@ class Parcheador(unittest.TestCase):
         self.assertEqual(hashlib.sha256(ROM.read_bytes()).hexdigest(),
                          juego.SHA256_ROM)
         img = imagen.monta(ROM)
-        self.assertEqual(len(img), imagen.TAM_IMAGEN)
+        self.assertEqual(len(img), juego.TAM_IMAGEN)
+        self.assertEqual(set(img[juego.SECTOR:]), {0xFF})   # el sector, en blanco
         self.assertEqual(hashlib.sha256(img).hexdigest(), juego.SHA256_IMAGEN)
 
 

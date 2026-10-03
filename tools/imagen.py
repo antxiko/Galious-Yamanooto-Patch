@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Monta la imagen de 2 MB lista para grabar en un Yamanooto.
+"""Monta la imagen para grabar en un Yamanooto, sin menu: el juego arranca
+solo.
 
-La imagen es el menu de nPackR con su directorio ya hecho para este juego
-(menu/menu.bin, sin un byte del juego) y, desde 0x20000, el juego parcheado
-por el script de packager/ a partir de la ROM de cada uno. Lo demas, 0xFF.
-Vale para los cartuchos de 2 MB y de 8 MB: la de 8 MB que saca nPackR es
-esta misma con 6 MB de 0xFF detras.
+La imagen es el juego parcheado por el script de packager/ a partir de la
+ROM de cada uno, en el offset 0 de la flash, y detras 0xFF hasta cubrir el
+sector de 64 KB donde graba (en blanco). El juego va en el modo con el que
+arranca el Yamanooto (Konami SCC), asi que no hace falta nada mas.
 
 Lo que cambia de un juego a otro esta en tools/juego.py.
 
@@ -21,12 +21,9 @@ RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "tools"))
 import juego  # noqa: E402
 
-TAM_IMAGEN = 0x200000
-JUEGO_EN = 0x20000
-
 
 def monta(rom_path):
-    """Devuelve la imagen de 2 MB hecha desde la ROM de rom_path."""
+    """Devuelve la imagen hecha desde la ROM de rom_path."""
     with tempfile.TemporaryDirectory() as tmp:
         parcheado = Path(tmp) / "parcheado.rom"
         r = subprocess.run([sys.executable, str(RAIZ / juego.PARCHEADOR),
@@ -38,12 +35,8 @@ def monta(rom_path):
     if len(datos) != juego.TAM_PARCHEADO:
         raise SystemExit(f"el juego parcheado mide {len(datos)} bytes, "
                          f"no {juego.TAM_PARCHEADO}")
-    menu = (RAIZ / "menu" / "menu.bin").read_bytes()
-    assert len(menu) <= JUEGO_EN
-    img = bytearray(b"\xff" * TAM_IMAGEN)
-    img[:len(menu)] = menu
-    img[JUEGO_EN:JUEGO_EN + len(datos)] = datos
-    return bytes(img)
+    assert juego.SECTOR + 0x10000 == juego.TAM_IMAGEN > len(datos)
+    return datos + b"\xff" * (juego.TAM_IMAGEN - len(datos))
 
 
 def main():

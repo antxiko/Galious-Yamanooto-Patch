@@ -18,7 +18,7 @@
 
 YAMA_ENAR    equ 0x7FFF
 ENAR_WREN    equ 0x10
-K4_REG_A000  equ 0xA000     ; K4 bank register for the 0xA000-0xBFFF window
+SCC_REG_A000 equ 0xB000     ; Konami-SCC bank register for the 0xA000-0xBFFF window
 SAVE_BANK    equ 0x18       ; the game's 64KB save sector (first bank)
 STAGE        equ 0xF200     ; raw staged copy of the sector's first 0xC0 bytes
 STAGE_LEN    equ 0x00C0     ; 3 slots x 0x40
@@ -27,7 +27,7 @@ STAGE_LEN    equ 0x00C0     ; 3 slots x 0x40
 
 engine:
     ld   a, SAVE_BANK
-    ld   (K4_REG_A000), a   ; map the sector (BEFORE WREN: banking freezes)
+    ld   (SCC_REG_A000), a   ; map the sector (BEFORE WREN: banking freezes)
     ld   a, ENAR_WREN
     ld   (YAMA_ENAR), a
     call erase_sector

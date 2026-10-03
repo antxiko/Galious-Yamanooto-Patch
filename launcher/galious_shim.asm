@@ -16,7 +16,7 @@
 ; Build: pasmo --bin galious_shim.asm galious_shim.bin   (org 0xBF93, max 93 B)
 ;==============================================================================
 
-K4_REG_8000 equ 0x8000
+SCC_REG_8000 equ 0x9000    ; Konami-SCC register of the 0x8000 window
 BankIn80    equ 0xF0F2      ; Galious' shadow of the 0x8000 window (= 2 here)
 DRIVER_BANK equ 0x10
 DRIVER      equ 0x8000
@@ -41,11 +41,11 @@ common:                     ; 0xBFA2
     push hl
     di
     ld   a, DRIVER_BANK
-    ld   (K4_REG_8000), a   ; map the driver into window 2
+    ld   (SCC_REG_8000), a   ; map the driver into window 2
     call DRIVER             ; C = fn -> returns A + flags
     push af
     ld   a, (BankIn80)
-    ld   (K4_REG_8000), a   ; put Galious' bank back
+    ld   (SCC_REG_8000), a   ; put Galious' bank back
     pop  af
     pop  hl
     pop  de
