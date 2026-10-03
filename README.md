@@ -48,4 +48,4 @@ It comes from [nPackR](https://github.com/antxiko/msx-yamanooto-npackr), which u
 
 ## Tested
 
-In openMSX; not yet on a real cartridge.
+In openMSX and on a real MSX with a real Yamanooto: pabibiris tested it and approves it.

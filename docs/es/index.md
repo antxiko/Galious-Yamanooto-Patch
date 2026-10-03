@@ -46,4 +46,4 @@ Sale de [nPackR](https://github.com/antxiko/msx-yamanooto-npackr), que lo usa pa
 
 ## Probado
 
-En openMSX; todavía no en un cartucho real.
+En openMSX y en un MSX real con un Yamanooto real: lo probó pabibiris y lo da por bueno.
