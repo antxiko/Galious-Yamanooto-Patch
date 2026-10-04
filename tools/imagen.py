@@ -7,7 +7,10 @@ ROM de cada uno, en el offset 0 de la flash, y detras 0xFF hasta cubrir el
 sector de 64 KB donde graba (en blanco). El juego va en el modo con el que
 arranca el Yamanooto (Konami SCC), asi que no hace falta nada mas.
 
-Lo que cambia de un juego a otro esta en tools/juego.py.
+Lo que cambia de un juego a otro esta en tools/juego.py; la segunda edicion,
+The Maze of Galious Enhanced (bladeba v1.04, MSX2), en tools/juego_enhanced.py.
+Se elige por el tamano de la ROM: 128 KB el original, 512 KB el Enhanced (el
+IPS ya aplicado).
 
 Uso: python tools/imagen.py <tu ROM> [salida]
 """
@@ -20,10 +23,24 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "tools"))
 import juego  # noqa: E402
+import juego_enhanced  # noqa: E402
+
+EDICIONES = (juego, juego_enhanced)
 
 
-def monta(rom_path):
+def edicion(rom_path):
+    """El juego.py que toca a la ROM de rom_path, por su tamano."""
+    tam = Path(rom_path).stat().st_size
+    for j in EDICIONES:
+        if tam == j.TAM_ROM:
+            return j
+    raise SystemExit(f"{Path(rom_path).name}: {tam} bytes; se espera "
+                     + " o ".join(f"{j.TAM_ROM} ({j.NOMBRE})" for j in EDICIONES))
+
+
+def monta(rom_path, juego=None):
     """Devuelve la imagen hecha desde la ROM de rom_path."""
+    juego = juego or edicion(rom_path)
     with tempfile.TemporaryDirectory() as tmp:
         parcheado = Path(tmp) / "parcheado.rom"
         r = subprocess.run([sys.executable, str(RAIZ / juego.PARCHEADOR),
@@ -43,12 +60,13 @@ def main():
     if len(sys.argv) not in (2, 3):
         raise SystemExit(__doc__)
     rom = Path(sys.argv[1])
+    juego = edicion(rom)
     salida = Path(sys.argv[2]) if len(sys.argv) == 3 else RAIZ / juego.SALIDA
     sha = hashlib.sha256(rom.read_bytes()).hexdigest()
     if sha != juego.SHA256_ROM:
         print(f"aviso: {rom.name} no es el volcado conocido ({juego.SHA256_ROM[:16]}...);"
               " el parcheador comprueba cada sitio y se niega si no cuadra")
-    img = monta(rom)
+    img = monta(rom, juego)
     salida.write_bytes(img)
     sha_img = hashlib.sha256(img).hexdigest()
     igual = " = la de referencia" if sha_img == juego.SHA256_IMAGEN else ""
