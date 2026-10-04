@@ -28,7 +28,7 @@
 ;                      the buffer the game zeroes on entry) draws the prompt
 ;                      over the game's three lines and the 3 slots under it;
 ;                      1/2/3 newly pressed on a used slot -> letters to 0xEB00
-;                      and 0xE02D = 1.
+;                      and 0xE02D = 1; ESC -> back to the title.
 ;
 ; Slot record at sector offset slot*0x40: [0xA5][45 letters]; 0xFF = empty.
 ; RAM (free in play, measured): engine 0xF110, staging and text 0xF1A0,
@@ -59,6 +59,9 @@ LETTERS     equ 0xEB40      ; the password made by hace_la_contrasena
 TYPED       equ 0xEB00      ; the buffer the typing screen fills
 LOAD_FLAG   equ 0xEBF0      ; zeroed with 0xEB00-0xEBFF on entry (p02:94FE)
 DONE        equ 0xE02D      ; state 0x12: RETURN pressed
+STATE       equ 0xE000      ; the game's state, its step and the step's wait
+STEP        equ 0xE001      ; (written as p00:43A0 does)
+WAIT        equ 0xE004
 
 ; Positions for the game's text routine: H >= 0xE0 means name-table address
 ; + 0xB500, and then each 0xFE goes to the next row.
@@ -186,6 +189,8 @@ load_frame:
     ld   (VAR_PREV), a
     ret
 lf_keys:
+    call esc_exit           ; ESC: back to the title
+    ret  nz
     call key_slot
     cp   0xFF
     ret  z
@@ -203,6 +208,27 @@ lf_keys:
     ret
 lf_none:
     jp   unmap_save
+
+; ESC (keyboard row 7, bit 2) held -> back to the title the way the game
+; leaves its demo (p00:43A0: state 0, step 0, no wait). Without it there was
+; no way out of the load menu with no slot used. NZ = leaving.
+esc_exit:
+    in   a, (0xAA)
+    and  0xF0
+    or   7
+    out  (0xAA), a
+    in   a, (0xA9)
+    and  0x04
+    jr   nz, ee_stay
+    xor  a
+    ld   (STATE), a
+    ld   (STEP), a
+    ld   (WAIT), a
+    inc  a                  ; NZ: leaving
+    ret
+ee_stay:
+    xor  a                  ; Z: stay
+    ret
 
 ;------------------------------------------------------------------------------
 ; tell the shim: draw TXT at HL with style A; C = 1: clear the box first
@@ -308,7 +334,7 @@ key_slot:
 ; the game's own font, in its own mixed case
 txt_which:  defb "Save in which slot?", 0
 txt_load:   defb "Load which slot?    ", 0xFE
-            defb "Press 1, 2 or 3     ", 0xFE
+            defb "1, 2 or 3  Esc exit ", 0xFE
             defb "                    ", 0xFE, 0
 txt_hand:   defb 0xFE, 0xFE, 0xFE, 0xFE, "    "  ; rows 14-17: the hand's top...
             defb 0xFE, "    ", 0                 ; ...and row 18 (columns 6-9)

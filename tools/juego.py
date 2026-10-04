@@ -11,7 +11,7 @@ SALIDA = "galious_yamanooto.rom"
 IPS = "ips/galious_yamanooto.ips"           # de la ROM a la imagen, publicado
 SECTOR = 0x18 * 0x2000                   # el sector de 64 KB donde graba
 TAM_IMAGEN = SECTOR + 0x10000           # 256 KB, para el offset 0 de la flash
-SHA256_IMAGEN = "fa30b022c9f26e6ed6566f16b159836d6286a35191964cf5d6a676552c3dcc4b"
+SHA256_IMAGEN = "35626e09e20caf986b0cc05f20f166337d85018a766c0dc1ed750b198ee621b8"
 
 # Los tramos que el parcheador declara (offset, largo): fuera de ellos, el
 # juego parcheado es la ROM original byte a byte (tests/test_parche.py)

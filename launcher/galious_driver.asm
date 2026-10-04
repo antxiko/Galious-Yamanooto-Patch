@@ -21,7 +21,7 @@
 ;                      under "LOAD WHICH SLOT?" / "PRESS 1 2 OR 3" drawn over
 ;                      the game's own two lines at rows 4 and 6);
 ;                      1/2/3 newly pressed on a used slot -> letters to 0xEB00
-;                      and 0xE02D = 1.
+;                      and 0xE02D = 1; ESC -> back to the title.
 ;
 ; Slot record at sector offset slot*0x40: [0xA5][45 letters]; 0xFF = empty.
 ; RAM (free in play, measured): engine 0xF100, staging 0xF200, vars 0xF2C0.
@@ -46,6 +46,9 @@ TXTBUF      equ 0xF2C1      ; one slot line, 0-terminated (15 bytes)
 LETTERS     equ 0xEB40      ; the password made by hace_la_contrasena
 TYPED       equ 0xEB00      ; the buffer the typing screen fills
 DONE        equ 0xE02D      ; state 0x12: RETURN pressed
+STATE       equ 0xE000      ; the game's state, its step and the step's wait
+STEP        equ 0xE001      ; (written as p00:43A0 does)
+WAIT        equ 0xE004
 MSG_AREA    equ 0xEE26      ; message area of the special rooms (RAM copy)
 VRAM_ROWS   equ 0x3908      ; the three password rows of the typing screen
 
@@ -151,6 +154,10 @@ load_frame:
     call set_vram
     ld   hl, txt_load
     call put_vram
+    ld   hl, 0x38A7         ; ...the game's middle line (row 5) to blank...
+    call set_vram
+    ld   hl, txt_blank
+    call put_vram
     ld   hl, 0x38C7         ; ...and "RETURN KEY!" (row 6), both languages
     call set_vram
     ld   hl, txt_press
@@ -172,6 +179,8 @@ lf_slot:
     ld   a, b
     cp   3
     jr   nz, lf_slot
+    call esc_exit           ; ESC: back to the title
+    ret  nz
     call key_slot
     cp   0xFF
     ret  z
@@ -189,6 +198,27 @@ lf_slot:
     ret
 lf_none:
     jp   unmap_save
+
+; ESC (keyboard row 7, bit 2) held -> back to the title the way the game
+; leaves its demo (p00:43A0: state 0, step 0, no wait). Without it there was
+; no way out of the load menu with no slot used. NZ = leaving.
+esc_exit:
+    in   a, (0xAA)
+    and  0xF0
+    or   7
+    out  (0xAA), a
+    in   a, (0xA9)
+    and  0x04
+    jr   nz, ee_stay
+    xor  a
+    ld   (STATE), a
+    ld   (STEP), a
+    ld   (WAIT), a
+    inc  a                  ; NZ: leaving
+    ret
+ee_stay:
+    xor  a                  ; Z: stay
+    ret
 
 ;------------------------------------------------------------------------------
 ; HL = "SLOT n  USED " or "SLOT n  EMPTY" for slot B (built in TXTBUF).
@@ -336,7 +366,8 @@ f_d:
 
 txt_which:  defb "SAVE IN WHICH SLOT?", 0
 txt_load:   defb "LOAD WHICH SLOT?   ", 0
-txt_press:  defb "PRESS 1 2 OR 3     ", 0
+txt_press:  defb "1 2 OR 3  ESC EXIT ", 0
+txt_blank:  defb "                   ", 0
 txt_error:  defb "FLASH ERROR        ", 0
 txt_slot:   defb "SLOT 1  "
 txt_used:   defb "USED ", 0
