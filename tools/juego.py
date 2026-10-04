@@ -8,6 +8,7 @@ TAM_PARCHEADO = 0x20000 + 0x2000         # + el driver como banco 0x10
 FUENTES = ["galious_engine.asm", "galious_shim.asm", "galious_driver.asm"]
 INCLUYE = {"galious_driver.asm": ["galious_engine.bin"]}
 SALIDA = "galious_yamanooto.rom"
+IPS = "ips/galious_yamanooto.ips"           # de la ROM a la imagen, publicado
 SECTOR = 0x18 * 0x2000                   # el sector de 64 KB donde graba
 TAM_IMAGEN = SECTOR + 0x10000           # 256 KB, para el offset 0 de la flash
 SHA256_IMAGEN = "fa30b022c9f26e6ed6566f16b159836d6286a35191964cf5d6a676552c3dcc4b"

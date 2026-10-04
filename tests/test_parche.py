@@ -12,6 +12,7 @@ sys.path.insert(0, str(RAIZ / "tools"))
 import juego  # noqa: E402
 import juego_enhanced  # noqa: E402
 import imagen  # noqa: E402
+import ips  # noqa: E402
 
 
 class Ensamblado:
@@ -75,6 +76,12 @@ class Parcheador:
         img = imagen.monta(ROM, juego)
         self.assertEqual(len(img), juego.TAM_IMAGEN)
         self.assertEqual(set(img[juego.SECTOR:]), {0xFF})   # el sector, en blanco
+        self.assertEqual(hashlib.sha256(img).hexdigest(), juego.SHA256_IMAGEN)
+
+    def test_ips_publicado(self):
+        """El IPS de ips/ lleva la ROM a la imagen de referencia."""
+        juego, ROM = self.juego, self.rom()
+        img = ips.aplica((RAIZ / juego.IPS).read_bytes(), ROM.read_bytes())
         self.assertEqual(hashlib.sha256(img).hexdigest(), juego.SHA256_IMAGEN)
 
 

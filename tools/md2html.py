@@ -82,7 +82,7 @@ def ruta(href):
     plano = h
     while plano.startswith("../"):
         plano = plano[3:]
-    if plano.startswith(("src/", "tools/", "medidas/", "launcher/", "packager/", "menu/", "tests/")) or plano in (
+    if plano.startswith(("src/", "tools/", "medidas/", "launcher/", "ips/", "packager/", "menu/", "tests/")) or plano in (
             "README.md", "README.es.md", "LICENSE", "AVISO-LEGAL.md",
             "LEGAL-NOTICE.md", "Makefile", "NOTICE.md"):
         return f"{REPO}/blob/main/{plano}"

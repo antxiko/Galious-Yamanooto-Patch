@@ -19,6 +19,8 @@ A damaged slot breaks nothing: it gives the game's own *THAT IS THE WRONG...*, l
 - **Python 3.**
 - **A Yamanooto**, 2 MB or 8 MB.
 
+For the second edition, *The Maze of Galious Enhanced*, see below.
+
 ## Building the image
 
 ```
@@ -31,7 +33,21 @@ You get `galious_yamanooto.rom` (256 KB), ready to flash from the start of the f
 openmsx -cart galious_yamanooto.rom -romtype Yamanooto
 ```
 
-`make test` runs the 4 tests: the `.bin` files come from their `.asm`, the patcher refuses another ROM and, with the ROM in the root, outside the stretches the patcher declares the game is the original byte for byte and the image is the reference one.
+**Without Python:** apply [ips/galious_yamanooto.ips](ips/galious_yamanooto.ips) (970 bytes) to the ROM with any IPS tool (Lunar IPS, Floating IPS, RomPatcher.js) and you get the same image. It only carries what the patch changes, nothing of the game.
+
+`make test` runs the 10 tests, 5 per edition: the `.bin` files come from their `.asm`, the patcher refuses another ROM and, with the ROM in the root, outside the stretches the patcher declares the game is the original byte for byte, the image is the reference one and the IPS gives that same image.
+
+## The Maze of Galious Enhanced
+
+bladeba's [Enhanced](https://github.com/bladeba/MSX/tree/master/Enhanced%20Games/Galious%20-%20enhanced) (v1.04, for MSX2: new SCREEN 5 graphics, SCC music, 512 KB Konami SCC) saves the same way: the same three slots, keys 1, 2 and 3, and the menus come out in the game's own font. The YES/NO hand does not show in the save menu, because you choose with the numbers.
+
+**94** bytes changed in **10** stretches · **8 KB** driver inside the game · 3 slots in **one 64 KB sector** · **576 KB** image
+
+- **The ROM:** the one above with bladeba's *Galious Enhanced V1.04* IPS applied: 524,288 bytes, sha256 `cdeaa916d198a3ca9891076eb79e05709876fa7ce18dcd929e76f1cf25403f53`. bladeba's IPS is not distributed here either.
+- **The image:** `python tools/imagen.py galious_enhanced.rom` gives `galious_enhanced_yamanooto.rom`; the script tells the edition by the ROM's size. Without Python, [ips/galious_enhanced_yamanooto.ips](ips/galious_enhanced_yamanooto.ips) (895 bytes) applied to the Enhanced ROM.
+- **Inside:** the Enhanced keeps the original's password, moved inside its bank 2 and with the same RAM. The three sites are p02:8EB9, p02:8ED1 and p02:9510. The shim (85 bytes) goes at the end of bank 3, which the Enhanced leaves zeroed and nothing points to. The driver goes in bank 0x0C, 8 KB left empty: the game maps it at the 0xA000 window but never reads it (measured in openMSX over 5 minutes of demo and play). There are no free 64 KB inside the 512 KB, so the sector goes after it, at relative bank 0x40.
+- **The text:** the driver cannot draw, because the game's text routine switches the banks above it. It leaves the text in RAM and the shim draws it with that routine in ASCII mode, as the game does with its English messages.
+- **Tested** in openMSX as a Yamanooto and inside an [nPackR](https://github.com/antxiko/msx-yamanooto-npackr) pack (v1.7.4, mapper `galious_enhanced`): save with items in one slot without touching the others, close, reopen and load, and the items come back. Not tested on a real MSX yet.
 
 ## How it works
 

@@ -17,6 +17,8 @@ Un slot dañado no rompe nada: da el *THAT IS THE WRONG...* del propio juego, ig
 - **Python 3.**
 - **Un Yamanooto** de 2 MB o de 8 MB.
 
+Para la segunda edición, *The Maze of Galious Enhanced*, mira más abajo.
+
 ## Montar la imagen
 
 ```
@@ -29,7 +31,21 @@ Sale `galious_yamanooto.rom` (256 KB), lista para grabar en el cartucho desde el
 openmsx -cart galious_yamanooto.rom -romtype Yamanooto
 ```
 
-`make test` pasa los 4 tests: los `.bin` salen de sus `.asm`, el parcheador rechaza otra ROM y, con la ROM en la raíz, fuera de los tramos que declara el parcheador el juego es el original byte a byte y la imagen es la de referencia.
+**Sin Python:** [ips/galious_yamanooto.ips](ips/galious_yamanooto.ips) (970 bytes) se aplica a la ROM con cualquier herramienta de IPS (Lunar IPS, Floating IPS, RomPatcher.js) y sale la misma imagen. Solo lleva lo que cambia el parche, nada del juego.
+
+`make test` pasa los 10 tests, 5 por edición: los `.bin` salen de sus `.asm`, el parcheador rechaza otra ROM y, con la ROM en la raíz, fuera de los tramos que declara el parcheador el juego es el original byte a byte, la imagen es la de referencia y el IPS da esa misma imagen.
+
+## The Maze of Galious Enhanced
+
+El [Enhanced de bladeba](https://github.com/bladeba/MSX/tree/master/Enhanced%20Games/Galious%20-%20enhanced) (v1.04, para MSX2: gráficos nuevos en SCREEN 5, música SCC, 512 KB Konami SCC) graba igual: los mismos tres huecos, con las teclas 1, 2 y 3, y los menús salen con la letra del propio juego. En el menú de grabar no sale la mano del SÍ/NO, porque se elige con los números.
+
+**94** bytes cambiados en **10** tramos · driver de **8 KB** dentro del juego · 3 huecos en **un sector de 64 KB** · imagen de **576 KB**
+
+- **La ROM:** la de arriba con el IPS *Galious Enhanced V1.04* de bladeba aplicado: 524.288 bytes, sha256 `cdeaa916d198a3ca9891076eb79e05709876fa7ce18dcd929e76f1cf25403f53`. El IPS de bladeba tampoco se distribuye aquí.
+- **La imagen:** `python tools/imagen.py galious_enhanced.rom` saca `galious_enhanced_yamanooto.rom`; el script reconoce la edición por el tamaño de la ROM. Sin Python, [ips/galious_enhanced_yamanooto.ips](ips/galious_enhanced_yamanooto.ips) (895 bytes) aplicado a la ROM Enhanced.
+- **Por dentro:** el Enhanced conserva la contraseña del original, movida dentro de su banco 2 y con la misma RAM. Los tres sitios son p02:8EB9, p02:8ED1 y p02:9510. El shim (85 bytes) va en el final del banco 3, que el Enhanced deja a ceros y al que no apunta nada. El driver va en el banco 0x0C, 8 KB vacíos: el juego lo pone en la ventana 0xA000 pero no lo lee nunca (medido en openMSX durante 5 minutos de demo y partida). Dentro de los 512 KB no hay 64 KB libres, así que el sector va detrás, en el banco relativo 0x40.
+- **El texto:** el driver no puede pintar, porque la rutina de texto del juego cambia los bancos por encima de él. Deja el texto en RAM y el shim lo pinta con esa rutina en modo ASCII, como hace el juego con sus mensajes en inglés.
+- **Probado** en openMSX como Yamanooto y metido en un pack de [nPackR](https://github.com/antxiko/msx-yamanooto-npackr) (v1.7.4, mapper `galious_enhanced`): grabar con objetos en un hueco sin tocar los otros, cerrar, reabrir y cargar, y vuelven los objetos. Todavía no se ha probado en un MSX real.
 
 ## Cómo funciona por dentro
 

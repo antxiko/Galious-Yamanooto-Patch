@@ -8,6 +8,7 @@ TAM_PARCHEADO = 0x80000                  # no crece: el driver va en su banco 0x
 FUENTES = ["enhanced_engine.asm", "enhanced_shim.asm", "enhanced_driver.asm"]
 INCLUYE = {"enhanced_driver.asm": ["enhanced_engine.bin"]}
 SALIDA = "galious_enhanced_yamanooto.rom"
+IPS = "ips/galious_enhanced_yamanooto.ips"           # de la ROM a la imagen, publicado
 SECTOR = 0x40 * 0x2000                   # el sector de 64 KB donde graba
 TAM_IMAGEN = SECTOR + 0x10000           # 576 KB, para el offset 0 de la flash
 SHA256_IMAGEN = "dd7dd148bccd7c3ed9f9f6008be251e8d02ea851391dff55f792aa12412b30f2"
